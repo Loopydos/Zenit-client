@@ -10,6 +10,10 @@ public class ZenitPacketFly extends Module {
     }
 
     @Override
+    public void onEnable() {
+    }
+
+    @Override
     public void onTick() {
         if (mc.player == null || mc.level == null) return;
 
@@ -39,10 +43,10 @@ public class ZenitPacketFly extends Module {
         double forward = 0;
         double strafe = 0;
 
-        if (mc.player.input.up) forward++;
-        if (mc.player.input.down) forward--;
-        if (mc.player.input.left) strafe++;
-        if (mc.player.input.right) strafe--;
+        if (mc.options.keyUp.isDown()) forward++;
+        if (mc.options.keyDown.isDown()) forward--;
+        if (mc.options.keyLeft.isDown()) strafe++;
+        if (mc.options.keyRight.isDown()) strafe--;
         
         if (forward == 0 && strafe == 0) return Vec3.ZERO;
         
