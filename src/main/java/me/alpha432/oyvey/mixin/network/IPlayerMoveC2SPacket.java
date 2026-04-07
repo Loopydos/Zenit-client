@@ -1,10 +1,10 @@
 package me.alpha432.oyvey.mixin.network;
 
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(PlayerMoveC2SPacket.class)
+@Mixin(ServerboundMovePlayerPacket.class)
 public interface IPlayerMoveC2SPacket {
     @Accessor("onGround")
     void setOnGround(boolean onGround);
