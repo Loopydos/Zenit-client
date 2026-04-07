@@ -1,19 +1,16 @@
 package me.alpha432.oyvey.features.modules.movement;
 
-import me.alpha432.oyvey.event.events.PacketEvent;
 import me.alpha432.oyvey.features.modules.Module;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.eventbus.api.SubscribeEvent; 
 
 public class ZenitPacketFly extends Module {
+    // Note: teleportId is initialized but not currently used in the logic below.
+    // To fully handle rubberbands, a packet listener for ClientboundPlayerPositionPacket is required.
     private int teleportId = 0;
 
     public ZenitPacketFly() {
-    
-        super("ZenitPacketFly", "Fly por desincronización de paquetes", Category.MOVEMENT, true, false, false);
+        super("ZenitPacketFly", "Packet-based fly for desyncing movement", Category.MOVEMENT);
     }
 
     @Override
@@ -22,13 +19,12 @@ public class ZenitPacketFly extends Module {
     }
 
     @Override
-    public void onUpdate() {
-        if (nullCheck()) return;
+    public void onTick() {
+        if (mc.player == null || mc.level == null) return;
 
-       
-        mc.player.setVelocity(0, 0, 0);
+        // Stops natural gravity and movement momentum
+        mc.player.setDeltaMovement(Vec3.ZERO);
 
-       
         double speed = 0.2;
         Vec3 direction = calculateDirection(speed);
 
@@ -36,43 +32,26 @@ public class ZenitPacketFly extends Module {
         double targetY = mc.player.getY();
         double targetZ = mc.player.getZ() + direction.z;
 
-        if (mc.options.jumpKey.isPressed()) targetY += speed;
-        if (mc.options.sneakKey.isPressed()) targetY -= speed;
+        // Vertical movement handling
+        if (mc.options.keyJump.isDown()) targetY += speed;
+        if (mc.options.keyShift.isDown()) targetY -= speed;
 
-      
-        if (mc.getNetworkHandler() != null) {
-         
-            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(targetX, targetY, targetZ, true));
-       
-            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(targetX, targetY - 1337.0, targetZ, false));
+        if (mc.getConnection() != null) {
+            // Sends the main movement packet
+            mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(targetX, targetY, targetZ, true));
+            
+            // Sends an out-of-bounds packet to confuse the anticheat (standard packet-fly technique)
+            mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(targetX, targetY - 1337.0, targetZ, false));
         }
 
-     
+        // Sets client-side position to prevent stuttering
         mc.player.setPos(targetX, targetY, targetZ);
     }
 
-    @SubscribeEvent
-    public void onPacketReceive(PacketEvent.Receive event) {
-        if (event.getPacket() instanceof PlayerPositionLookS2CPacket packet) {
-            teleportId = packet.getTeleportId();
-            if (mc.getNetworkHandler() != null) {
-                mc.getNetworkHandler().sendPacket(new TeleportConfirmC2SPacket(teleportId));
-            }
-            event.setCanceled(true); 
-        }
-    }
-
-    @SubscribeEvent
-    public void onPacketSend(PacketEvent.Send event) {
-        if (event.getPacket() instanceof PlayerMoveC2SPacket) {
-            
-            event.setCanceled(true);
-        }
-    }
-
     private Vec3 calculateDirection(double speed) {
-        float yaw = mc.player.getYaw();
-       
+        float yaw = mc.player.getYRot(); // Mojmap: getYRot() is used for yaw
+        
+        // In 1.21.1 Mojmaps, forward and left impulses are stored in forwardImpulse and leftImpulse
         double forward = mc.player.input.forwardImpulse;
         double strafe = mc.player.input.leftImpulse;
         
