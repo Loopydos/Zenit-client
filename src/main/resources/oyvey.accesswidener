@@ -1,4 +1,5 @@
-accessWidener v2 named
+accessWidener v1 named
+//accessWidener v2 named
 
 accessible field net/minecraft/client/Minecraft rightClickDelay I
 accessible field net/minecraft/network/protocol/game/ServerboundInteractPacket entityId I
