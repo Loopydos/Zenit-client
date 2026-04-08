@@ -18,6 +18,7 @@ public class ZenitPacketFly extends Module {
         if (mc.player == null || mc.level == null) return;
 
         mc.player.setDeltaMovement(Vec3.ZERO);
+        mc.player.fallDistance = 0.0f;
 
         double speed = 0.2;
         Vec3 direction = calculateDirection(speed);
@@ -31,7 +32,7 @@ public class ZenitPacketFly extends Module {
 
         if (mc.getConnection() != null) {
             mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(targetX, targetY, targetZ, true, false));
-            mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(targetX, targetY - 1337.0, targetZ, false, false));
+            mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(targetX, targetY + 1337.0, targetZ, true, false));
         }
 
         mc.player.setPos(targetX, targetY, targetZ);
