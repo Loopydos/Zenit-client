@@ -1,16 +1,14 @@
 {
   "schemaVersion": 1,
   "id": "oyvey",
-  "version": "${version}",
-  "name": "oyvey-ported",
-  "description": "free and opensource client base",
+  "version": "1.0.0",
+  "name": "Zenit Client",
+  "description": "Customized client based on Zenit",
   "authors": [
-    "3arthqu4ke",
-    "alpha432",
-    "cattyn"
+    "Commands_dragon"
   ],
   "contact": {
-    "repo": "https://github.com/mioclient/oyvey-ported"
+    "repo": "https://github.com/Loopydos/Zenit-client"
   },
   "license": "MIT",
   "environment": "client",
@@ -27,8 +25,8 @@
     "oyvey.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=${loader_version}",
-    "fabric": "*",
-    "minecraft": "${minecraft_version}"
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
+    "minecraft": "1.21.11"
   }
 }
