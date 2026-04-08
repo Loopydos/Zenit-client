@@ -6,17 +6,21 @@ import net.minecraft.world.phys.Vec3;
 
 public class ZenitPacketFly extends Module {
     public ZenitPacketFly() {
-        super("ZenitPacketFly", "Packet-based fly for desyncing movement", Category.MOVEMENT);
+        super("ZenitPacketFly", "Safe fly to prevent fall damage", Category.MOVEMENT);
     }
 
     @Override
     public void onEnable() {
+        if (mc.player != null) {
+            mc.player.fallDistance = 0.0f; // Resetear daño al encender
+        }
     }
 
     @Override
     public void onTick() {
         if (mc.player == null || mc.level == null) return;
 
+        // Congelar el movimiento normal y resetear la caída en el cliente
         mc.player.setDeltaMovement(Vec3.ZERO);
         mc.player.fallDistance = 0.0f;
 
@@ -30,11 +34,13 @@ public class ZenitPacketFly extends Module {
         if (mc.options.keyJump.isDown()) targetY += speed;
         if (mc.options.keyShift.isDown()) targetY -= speed;
 
+        // Enviar nuestra posición exacta marcando 'true' (onGround)
+        // Esto le dice al servidor que estamos apoyados en un bloque imaginario, anulando la caída.
         if (mc.getConnection() != null) {
             mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(targetX, targetY, targetZ, true, false));
-            mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(targetX, targetY + 1337.0, targetZ, true, false));
         }
 
+        // Mover al jugador físicamente en nuestra pantalla
         mc.player.setPos(targetX, targetY, targetZ);
     }
 
